@@ -89,13 +89,15 @@ public class SensorLimelight3A_test extends LinearOpMode {
         imu_IMU = hardwareMap.get(IMU.class, "imu");
 
         telemetry.setMsTransmissionInterval(11);
-        
 
+        // This sets how often we ask Limelight for data (100 times per second)
+        limelight.setPollRateHz(100);
         /*
          * Starts polling for data.  If you neglect to call start(), getLatestResult() will return null.
          */
-        limelight.start();
         Init_IMU();
+        limelight.start();
+
 
         telemetry.addData(">", "Robot Ready.  Press Play.");
         telemetry.update();
@@ -112,7 +114,7 @@ public class SensorLimelight3A_test extends LinearOpMode {
 
             orientation = imu_IMU.getRobotYawPitchRollAngles();
             double yaw = orientation.getYaw(AngleUnit.DEGREES);
-            limelight.updateRobotOrientation(yaw);
+            //limelight.updateRobotOrientation(yaw);
 
             //getLimelightMountAngleDegrees();
             //getDistanceOfSample();
@@ -307,12 +309,25 @@ public class SensorLimelight3A_test extends LinearOpMode {
                 int id = fr.getFiducialId(); // The ID number of the fiducial
                 double x = fr.getTargetXDegrees(); // Where it is (left-right)
                 double y = fr.getTargetYDegrees(); // Where it is (up-down)
-                Position pos_in_INCH2 = fr.getCameraPoseTargetSpace().getPosition().toUnit(DistanceUnit.INCH);
+
+                /*
+                getTargetPoseCameraSpace
+                 Z +ve = distance of april tag with respect to the camera
+                 X +ve = April tag is to the right of the camera
+                 */
+                Position pos_in_INCH2 = fr.getTargetPoseCameraSpace().getPosition().toUnit(DistanceUnit.INCH);
+
+                //getCameraPoseTargetSpace also works
+                //Position pos_in_INCH2 = fr.().getPosition().toUnit(DistanceUnit.INCH);
+                //getRobotPoseTargetSpace -> did not try
+                //Position pos_in_INCH2 = fr.getRobotPoseTargetSpace().getPosition().toUnit(DistanceUnit.INCH);
+
+
                 double y_distance = pos_in_INCH2.y;
                 double x_distance = pos_in_INCH2.x;
                 double z_distance = pos_in_INCH2.z;
 
-                telemetry.addLine("getCameraPoseTargetSpace");
+                telemetry.addLine("getTargetPoseCameraSpace");
                 telemetry.addLine("XY " +
                         JavaUtil.formatNumber(x_distance, 6, 1) + " " +
                         JavaUtil.formatNumber(y_distance, 6, 1) + " "  +
