@@ -32,6 +32,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
@@ -318,7 +319,7 @@ public class SensorLimelight3A_test extends LinearOpMode {
                 Position pos_in_INCH2 = fr.getTargetPoseCameraSpace().getPosition().toUnit(DistanceUnit.INCH);
 
                 //getCameraPoseTargetSpace also works
-                //Position pos_in_INCH2 = fr.().getPosition().toUnit(DistanceUnit.INCH);
+                //Position pos_in_INCH2 = fr.().getCameraPoseTargetSpace.getPosition().toUnit(DistanceUnit.INCH);
                 //getRobotPoseTargetSpace -> did not try
                 //Position pos_in_INCH2 = fr.getRobotPoseTargetSpace().getPosition().toUnit(DistanceUnit.INCH);
 
@@ -328,10 +329,18 @@ public class SensorLimelight3A_test extends LinearOpMode {
                 double z_distance = pos_in_INCH2.z;
 
                 telemetry.addLine("getTargetPoseCameraSpace");
-                telemetry.addLine("XY " +
+                telemetry.addLine("XYZ " +
                         JavaUtil.formatNumber(x_distance, 6, 1) + " " +
                         JavaUtil.formatNumber(y_distance, 6, 1) + " "  +
                         JavaUtil.formatNumber(z_distance, 6, 1) + " "  +"  (INCH)");
+
+                YawPitchRollAngles ypr = fr.getCameraPoseTargetSpace().getOrientation();
+                double yaw = ypr.getYaw(); //degrees?? - need to check
+
+                telemetry.addLine("Yaw " +
+                             JavaUtil.formatNumber(yaw, 6, 1) + " "  +"  (INCH)");
+
+
 
 
 

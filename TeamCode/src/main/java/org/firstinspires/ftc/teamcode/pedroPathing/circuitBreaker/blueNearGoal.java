@@ -1,27 +1,19 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker;
 
 
-import com.pedropathing.util.*;
-import com.pedropathing.math.*;
-import com.pedropathing.paths.*;
-import com.pedropathing.util.*;
-
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
-
 import com.pedropathing.util.Timer;
 
-import com.bylazar.field.FieldManager;
-import com.bylazar.field.PanelsField;
-import com.bylazar.field.Style;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.geometry.*;
+import com.pedropathing.math.*;
+import com.pedropathing.paths.*;
+import com.pedropathing.util.*;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -31,8 +23,8 @@ import java.util.List;
 
 //example: https://pedropathing.com/docs/pathing/examples/auto
 
-@Autonomous(name="BlueNearEnd", group="Auto")
-public class blueNearEnd extends OpMode {
+@Autonomous(name="BlueNearGoal", group="Auto")
+public class blueNearGoal extends OpMode {
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
@@ -51,9 +43,19 @@ public class blueNearEnd extends OpMode {
      * for Decode [0,0] is at the Red Human player zone ( bottom left corner of field)
      */
 
-    /** Start Pose of our robot */
-    private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
 
+    /** Start Pose and Shoot pose is the same for our robot */
+    private final Pose startPose = new Pose(14, 111, Math.toRadians(90));
+    private final Pose intermediatePose1 = new Pose(24,100, Math.toRadians(-90)); //Linear
+    private final Pose pickUpPose1 = new Pose (24, 90, Math.toRadians(-90)); //Constant
+    private final Pose readMotifPose = new Pose(35,96, Math.toRadians(45)); //Linear
+    private final Pose shootPose1 = new Pose(35,120, Math.toRadians(135)); //Linear
+    private final Pose intermediatePose2 = new Pose(24,72, Math.toRadians(-90)); //Linear
+    private final Pose pickUpPose2 = new Pose (24, 66, Math.toRadians(-90)); //Constant
+    private final Pose ShootPose2 = new Pose (35, 120, Math.toRadians(135)); //Liner
+    private final Pose intermediatePose3 = new Pose (24, 48, Math.toRadians(-90)); //Linear
+    private final Pose pickUpPose3 = new Pose (24, 42, Math.toRadians(-90)); //Constant
+    private final Pose ShootPose3 = new Pose (35, 120, Math.toRadians(135)); //Liner
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
     public void buildPaths() {
