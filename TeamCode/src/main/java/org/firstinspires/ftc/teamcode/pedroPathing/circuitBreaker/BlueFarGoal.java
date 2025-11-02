@@ -17,6 +17,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Artifact;
+import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Intake;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,10 @@ public class BlueFarGoal extends OpMode {
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
+
+    double shooterPower = 1.0;
+    Artifact artifact;
+    Intake intake;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
@@ -54,7 +60,8 @@ public class BlueFarGoal extends OpMode {
     private final Pose controlPose3 = new Pose(65,76);
     private final Pose shootPose3 = new Pose(56,105, Math.toRadians(120)); //Linear
 
-
+    private PathChain  shootArtifact1, grabPickup1, shootArtifact2, grabPickup2,
+            ShootArtifact3;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -74,6 +81,35 @@ public class BlueFarGoal extends OpMode {
          * PathChains hold Path(s) within it and are able to hold their end point, meaning that they will holdPoint until another path is followed.
          * Here is a explanation of the difference between Paths and PathChains <https://pedropathing.com/commonissues/pathtopathchain.html> */
 
+        shootArtifact1 = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, shootPose1))
+                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose1.getHeading())
+                .build();
+
+        grabPickup1 = follower.pathBuilder()
+                .addPath(new BezierCurve(shootPose1,controlPose1,pickUpPose1))
+                .setLinearHeadingInterpolation(shootPose1.getHeading(), pickUpPose1.getHeading())
+                .addParametricCallback(0, () -> {intake.run();})
+                .build();
+
+        shootArtifact2 = follower.pathBuilder()
+                .addPath(new BezierCurve(pickUpPose1,controlPose2,shootPose2))
+                .setLinearHeadingInterpolation(pickUpPose1.getHeading(), shootPose2.getHeading())
+                .build();
+
+        grabPickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose2, intermediatePose2))
+                .setLinearHeadingInterpolation(shootPose2.getHeading(), intermediatePose2.getHeading())
+                .addPath(new BezierLine(intermediatePose2, pickUpPose2))
+                .setConstantHeadingInterpolation(pickUpPose2.getHeading())
+                .addParametricCallback(0, () -> {intake.run();})
+                .build();
+
+        ShootArtifact3 = follower.pathBuilder()
+                .addPath(new BezierCurve(pickUpPose2,controlPose3,shootPose3))
+                .setLinearHeadingInterpolation(pickUpPose2.getHeading(), shootPose3.getHeading())
+                .build();
+
     }
 
     /** This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
@@ -82,8 +118,57 @@ public class BlueFarGoal extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                follower.followPath(shootArtifact1, true);
+                setPathState(1);
                 break;
             case 1:
+                if(!follower.isBusy()){
+                    artifact.shootArtifact(shooterPower);
+                    setPathState(2);
+                }
+                break;
+            case 2:
+                if(artifact.isArtifactShootingComplete()){
+                    follower.followPath(grabPickup1, true);
+                    setPathState(3);
+                }
+                break;
+            case 3:
+                if(!follower.isBusy()){
+                    intake.stop();
+                    follower.followPath(shootArtifact2, true);
+                    setPathState(4);
+                }
+                break;
+            case 4:
+                if(!follower.isBusy()){
+                    artifact.shootArtifact(shooterPower);
+                    setPathState(5);
+                }
+                break;
+            case 5:
+                if(artifact.isArtifactShootingComplete()){
+                    follower.followPath(grabPickup2, true);
+                    setPathState(6);
+                }
+                break;
+            case 6:
+                if(!follower.isBusy()){
+                    intake.stop();
+                    follower.followPath(ShootArtifact3, true);
+                    setPathState(7);
+                }
+                break;
+            case 7:
+                if(!follower.isBusy()){
+                    artifact.shootArtifact(shooterPower);
+                    setPathState(8);
+                }
+                break;
+            case 8:
+                if(artifact.isArtifactShootingComplete()){
+                    setPathState(-1);
+                }
                 break;
         }
     }
@@ -119,9 +204,13 @@ public class BlueFarGoal extends OpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
+        int aprilTagDetected = 21;// TODO assign the detected aprilTag here
+        artifact = new Artifact(hardwareMap,aprilTagDetected);
+        intake = new Intake(hardwareMap);
+
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
-        //follower.setStartingPose(startPose);
+        follower.setStartingPose(startPose);
 
     }
 
