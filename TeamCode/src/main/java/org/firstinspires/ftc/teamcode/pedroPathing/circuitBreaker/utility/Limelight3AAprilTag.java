@@ -6,9 +6,8 @@ import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
- import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.util.List;
@@ -16,8 +15,7 @@ import java.util.List;
 public class Limelight3AAprilTag {
 
     private Limelight3A limelight;
-    private Telemetry telemetry;
-
+   
     public Limelight3AAprilTag(HardwareMap hardwareMap) {
         this.limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
