@@ -13,7 +13,7 @@ public class Hood {
 
     //servoPosition can range from 0 to 1
     //servoPosition = 1 is Hood fully down
-    public void setHoodPosition(int servoPosition){
+    public void setHoodPosition(double servoPosition){
         this.HoodL.setPosition(servoPosition);
     }
 }

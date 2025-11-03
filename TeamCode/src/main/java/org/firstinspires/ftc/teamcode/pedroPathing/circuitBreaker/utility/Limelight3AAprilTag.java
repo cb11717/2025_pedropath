@@ -15,7 +15,7 @@ import java.util.List;
 public class Limelight3AAprilTag {
 
     private Limelight3A limelight;
-   
+
     public Limelight3AAprilTag(HardwareMap hardwareMap) {
         this.limelight = hardwareMap.get(Limelight3A.class, "limelight");
 

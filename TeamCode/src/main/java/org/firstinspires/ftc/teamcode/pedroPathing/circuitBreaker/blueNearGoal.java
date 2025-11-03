@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Artifact;
+import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Hood;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Intake;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limelight3AAprilTag;
 
@@ -38,6 +39,7 @@ public class blueNearGoal extends OpMode {
     Artifact artifact;
     Intake intake;
     Limelight3AAprilTag limelight;
+    Hood hood;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
@@ -262,6 +264,8 @@ public class blueNearGoal extends OpMode {
         int aprilTagDetected = getMotifAprilTag();
         artifact = new Artifact(hardwareMap,aprilTagDetected);
         intake = new Intake(hardwareMap);
+        hood = new Hood(hardwareMap);
+        hood.setHoodPosition(1);
 
         follower = Constants.createFollower(hardwareMap);
 
