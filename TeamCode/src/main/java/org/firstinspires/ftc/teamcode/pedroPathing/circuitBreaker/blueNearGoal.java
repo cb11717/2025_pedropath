@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Artifact;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Intake;
+import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limelight3AAprilTag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,7 @@ public class blueNearGoal extends OpMode {
 
     Artifact artifact;
     Intake intake;
+    Limelight3AAprilTag limelight;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
@@ -158,6 +160,9 @@ public class blueNearGoal extends OpMode {
                 break;
             case 3:
                 if(!follower.isBusy()){
+                    int aprilTagDetected = getMotifAprilTag();
+                    artifact.setAprilTag(aprilTagDetected);
+
                     follower.followPath(shootArtifact2, true);
                     setPathState(4);
                 }
@@ -252,8 +257,9 @@ public class blueNearGoal extends OpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
-        //TODO: read aprilTag with Limelight
-        int aprilTagDetected = 21;// TODO assign the detected aprilTag here
+        limelight = new Limelight3AAprilTag(hardwareMap);
+
+        int aprilTagDetected = getMotifAprilTag();
         artifact = new Artifact(hardwareMap,aprilTagDetected);
         intake = new Intake(hardwareMap);
 
@@ -282,5 +288,18 @@ public class blueNearGoal extends OpMode {
     /** We do not use this because everything should automatically disable **/
     @Override
     public void stop() {
+    }
+
+    // Limelight pipeline 0 is configured for Motif aprilTag
+    private int getMotifAprilTag(){
+        int aprilTagDetected = this.limelight.getAprilTagNumber(0);
+
+        telemetry.addData("AprilTag Detected", aprilTagDetected);
+        telemetry.update();
+
+        if (aprilTagDetected != 21 && aprilTagDetected != 22 && aprilTagDetected != 23) {
+            aprilTagDetected = 21;
+        }
+        return aprilTagDetected;
     }
 }

@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Artifact;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Intake;
+import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limelight3AAprilTag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ public class BlueFarGoal extends OpMode {
     double shooterPower = 1.0;
     Artifact artifact;
     Intake intake;
+    Limelight3AAprilTag limelight;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
@@ -57,8 +59,10 @@ public class BlueFarGoal extends OpMode {
     private final Pose shootPose2 = new Pose(56,14, Math.toRadians(110)); //Linear
     private final Pose intermediatePose2 = new Pose(24,24, Math.toRadians(90)); //Linear
     private final Pose pickUpPose2 = new Pose(24,31, Math.toRadians(90)); //Constant
-    private final Pose controlPose3 = new Pose(65,76);
+    private final Pose shootPose3 = new Pose(56,14,Math.toRadians(110));
+    /*private final Pose controlPose3 = new Pose(65,76);
     private final Pose shootPose3 = new Pose(56,105, Math.toRadians(120)); //Linear
+     */
 
     private PathChain  shootArtifact1, grabPickup1, shootArtifact2, grabPickup2,
             ShootArtifact3;
@@ -106,9 +110,16 @@ public class BlueFarGoal extends OpMode {
                 .build();
 
         ShootArtifact3 = follower.pathBuilder()
+                .addPath(new BezierLine(pickUpPose2,shootPose3))
+                .setLinearHeadingInterpolation(pickUpPose2.getHeading(), shootPose3.getHeading())
+                .build();
+
+       /* ShootArtifact3 = follower.pathBuilder()
                 .addPath(new BezierCurve(pickUpPose2,controlPose3,shootPose3))
                 .setLinearHeadingInterpolation(pickUpPose2.getHeading(), shootPose3.getHeading())
                 .build();
+
+        */
 
     }
 
@@ -204,7 +215,16 @@ public class BlueFarGoal extends OpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
-        int aprilTagDetected = 21;// TODO assign the detected aprilTag here
+        limelight = new Limelight3AAprilTag(hardwareMap);
+        int aprilTagDetected = limelight.getAprilTagNumber(0); // pipeline 0 is for Motif aprilTag
+
+        telemetry.addData("AprilTag Detected", aprilTagDetected);
+        telemetry.update();
+
+        if (aprilTagDetected != 21 && aprilTagDetected != 22 && aprilTagDetected != 23) {
+            aprilTagDetected = 21;
+        }
+
         artifact = new Artifact(hardwareMap,aprilTagDetected);
         intake = new Intake(hardwareMap);
 
