@@ -21,6 +21,8 @@ public class Artifact {
     int aprilTagNumber;
     boolean artifactShootingCompete;
     double shooterPower;
+    double shooterVelocity;
+    int sleepTimer;
 
     public Artifact(HardwareMap hardwareMap, int iAprilTagNumber){
         this.ArtifactL = hardwareMap.get(CRServo.class, "ArtifactL");
@@ -34,6 +36,8 @@ public class Artifact {
         this.aprilTagNumber = iAprilTagNumber;
         this.artifactShootingCompete = true; //true is default
         this.shooterPower = 1.0;
+        this.shooterVelocity = 0.0;
+        this.sleepTimer = 1000;
 
         this.kicker = new Kicker(hardwareMap);
         this.shooter = new Shooter(hardwareMap);
@@ -52,41 +56,48 @@ public class Artifact {
      detect color at each location. If color is not detected, and distance is measurable,
      shoot irrespective of the color
      */
-    public void shootArtifact(double iShooterPower){
+    public void shootArtifact(double iShooterPower, double iShooterVelocity){
 
         this.artifactShootingCompete = false;
-        if(iShooterPower > 0) {
+        if(iShooterVelocity > 0)
+        {
+            this.shooterVelocity = iShooterVelocity;
+        }
+       else if (iShooterPower > 0){
             this.shooterPower = iShooterPower;
+        } else {
+            this.shooterPower = 1.0;
         }
 
-        this.shooter.shoot(this.shooterPower);
+        this.shooter.shoot(this.shooterPower, this.shooterVelocity);
 
         //start artifact based color detected/distance detected and the AprilTag motif
         int colorLeft = this.colorDetector.detectColor("L");
         int colorCenter = this.colorDetector.detectColor("C");
         int colorRight = this.colorDetector.detectColor("R");
 
+        this.kicker.run();
         //if April Tag ID 21, shooting sequence should be GPP
         if( this.aprilTagNumber == 21){
             if(colorLeft == 2){
                 this.ArtifactL.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 this.ArtifactC.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 this.ArtifactR.setPower(1);
 
             } else if (colorCenter == 2 ){
                 this.ArtifactC.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 this.ArtifactR.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 this.ArtifactL.setPower(1);
 
             } else if(colorRight == 2){
                 this.ArtifactR.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 this.ArtifactL.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 this.ArtifactC.setPower(1);
             }
             //if any of the distance sensors still show that there is an artifact, just shoot
@@ -96,39 +107,39 @@ public class Artifact {
             //April Tag ID 22 - shooting sequence should be PGP
             if(colorLeft == 3){
                 this.ArtifactL.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 if(colorCenter == 2){
                     this.ArtifactC.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactR.setPower(1);
                 }else if(colorRight == 2){
                     this.ArtifactR.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactC.setPower(1);
                 }
             } else if(colorCenter == 3){
                 this.ArtifactC.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 if(colorLeft == 2){
                     this.ArtifactL.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactR.setPower(1);
                 }else if(colorRight == 2){
                     this.ArtifactR.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactL.setPower(1);
                 }
 
             } else if( colorRight == 3){
                 this.ArtifactR.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 if(colorLeft == 2){
                     this.ArtifactL.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactC.setPower(1);
                 }else if(colorCenter == 2){
                     this.ArtifactC.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactL.setPower(1);
                 }
             }
@@ -139,39 +150,40 @@ public class Artifact {
             //if April Tag ID 23 - shooting sequence should be PPG
             if(colorLeft == 3){
                 this.ArtifactL.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 if(colorRight == 3){
                     this.ArtifactR.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactC.setPower(1);
                 }else if(colorCenter == 3){
                     this.ArtifactC.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactR.setPower(1);
                 }
             } else if(colorRight == 3){
                 this.ArtifactR.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 if(colorLeft == 3){
                     this.ArtifactL.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactC.setPower(1);
                 }else if(colorCenter == 3){
                     this.ArtifactC.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactL.setPower(1);
                 }
             } else if (colorCenter == 3){
                 this.ArtifactC.setPower(1);
-                this.sleep(100);
+                this.sleep(this.sleepTimer);
                 if(colorRight == 3){
                     this.ArtifactR.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactL.setPower(1);
                 } else if(colorLeft == 3){
                     this.ArtifactL.setPower(1);
-                    this.sleep(100);
+                    this.sleep(this.sleepTimer);
                     this.ArtifactR.setPower(1);
+
                 }
             }
             //if any of the distance sensors still show that there is an artifact, just shoot
@@ -180,13 +192,14 @@ public class Artifact {
         } else {
             //did not get aprilTag, just shoot in any sequence
             this.ArtifactL.setPower(1);
-            this.sleep(100);
+            this.sleep(this.sleepTimer);
             this.ArtifactC.setPower(1);
-            this.sleep(100);
+            this.sleep(this.sleepTimer);
             this.ArtifactR.setPower(1);
+            this.sleep(this.sleepTimer);
         }
-        this.kicker.run();
-        this.sleep(100);
+
+        this.sleep(this.sleepTimer);
 
         this.kicker.stop();
         this.shooter.stop();
@@ -202,7 +215,7 @@ public class Artifact {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             // Handle the InterruptedException if the thread is interrupted while sleeping
-            Thread.currentThread().interrupt(); // Re-interrupt the current thread
+            //Thread.currentThread().interrupt(); // Re-interrupt the current thread
 
         }
     }
@@ -221,6 +234,13 @@ public class Artifact {
     public void shootUnidentifiableArtifact(int colorLeft,int colorCenter,int colorRight)
     {
 
+        this.ArtifactL.setPower(1);
+        this.sleep(this.sleepTimer);
+        this.ArtifactC.setPower(1);
+        this.sleep(this.sleepTimer);
+        this.ArtifactR.setPower(1);
+
+        /*
         if(colorLeft == 1){
             this.ArtifactL.setPower(1);
         }
@@ -230,6 +250,10 @@ public class Artifact {
         if (colorRight == 1){
             this.ArtifactR.setPower(1);
         }
+         */
+
+
+
 
     }
 }

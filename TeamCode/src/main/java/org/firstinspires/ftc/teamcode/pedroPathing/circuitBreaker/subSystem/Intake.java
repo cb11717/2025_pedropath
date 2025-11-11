@@ -20,7 +20,7 @@ public class Intake {
     }
 
     public void stop(){
-        this.intake.setPower(0.0);
+        this.intake.setPower(0);
         this.intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 

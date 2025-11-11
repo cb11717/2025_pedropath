@@ -26,13 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Autonomous(name="BlueFarGoal", group="Auto")
+@Autonomous(name="BlueFarGoal", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
 public class BlueFarGoal extends OpMode {
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
 
     double shooterPower = 1.0;
+    double shooterVelocityFar = 2300;
     Artifact artifact;
     Intake intake;
     Limelight3AAprilTag limelight;
@@ -56,7 +57,7 @@ public class BlueFarGoal extends OpMode {
     private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
     private final Pose shootPose1 = new Pose(56,14, Math.toRadians(110)); //Linear
     private final Pose controlPose1 = new Pose(35,30);
-    private final Pose pickUpPose1 = new Pose(9,8, Math.toRadians(180)); //Linear
+    private final Pose pickUpPose1 = new Pose(10,9, Math.toRadians(180)); //Linear
     private final Pose controlPose2 = new Pose(35,30);
     private final Pose shootPose2 = new Pose(56,14, Math.toRadians(110)); //Linear
     private final Pose intermediatePose2 = new Pose(24,24, Math.toRadians(90)); //Linear
@@ -90,17 +91,24 @@ public class BlueFarGoal extends OpMode {
         shootArtifact1 = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, shootPose1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose1.getHeading())
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootPose1,controlPose1,pickUpPose1))
                 .setLinearHeadingInterpolation(shootPose1.getHeading(), pickUpPose1.getHeading())
                 .addParametricCallback(0, () -> {intake.run();})
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
         shootArtifact2 = follower.pathBuilder()
                 .addPath(new BezierCurve(pickUpPose1,controlPose2,shootPose2))
                 .setLinearHeadingInterpolation(pickUpPose1.getHeading(), shootPose2.getHeading())
+                .addParametricCallback(1, () -> {intake.stop();})
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
         grabPickup2 = follower.pathBuilder()
@@ -109,11 +117,16 @@ public class BlueFarGoal extends OpMode {
                 .addPath(new BezierLine(intermediatePose2, pickUpPose2))
                 .setConstantHeadingInterpolation(pickUpPose2.getHeading())
                 .addParametricCallback(0, () -> {intake.run();})
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
         ShootArtifact3 = follower.pathBuilder()
                 .addPath(new BezierLine(pickUpPose2,shootPose3))
                 .setLinearHeadingInterpolation(pickUpPose2.getHeading(), shootPose3.getHeading())
+                .addParametricCallback(1, () -> {intake.stop();})
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
        /* ShootArtifact3 = follower.pathBuilder()
@@ -135,27 +148,31 @@ public class BlueFarGoal extends OpMode {
                 setPathState(1);
                 break;
             case 1:
+                //if(!follower.isBusy() || (follower.getVelocity().getMagnitude() <= follower.getCurrentPath().getPathEndVelocityConstraint())){
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower);
+                    artifact.shootArtifact(shooterPower, shooterVelocityFar);
                     setPathState(2);
                 }
                 break;
             case 2:
                 if(artifact.isArtifactShootingComplete()){
                     follower.followPath(grabPickup1, true);
+
                     setPathState(3);
+                    //setPathState(-1);
                 }
                 break;
             case 3:
                 if(!follower.isBusy()){
-                    intake.stop();
+                    //intake.stop();
+                   this.artifact.sleep(750);
                     follower.followPath(shootArtifact2, true);
                     setPathState(4);
                 }
                 break;
             case 4:
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower);
+                    artifact.shootArtifact(shooterPower, shooterVelocityFar);
                     setPathState(5);
                 }
                 break;
@@ -167,19 +184,22 @@ public class BlueFarGoal extends OpMode {
                 break;
             case 6:
                 if(!follower.isBusy()){
-                    intake.stop();
+                    //intake.stop();
+                    this.artifact.sleep(750);
                     follower.followPath(ShootArtifact3, true);
                     setPathState(7);
                 }
                 break;
             case 7:
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower);
+                    artifact.shootArtifact(shooterPower, shooterVelocityFar);
                     setPathState(8);
                 }
                 break;
             case 8:
                 if(artifact.isArtifactShootingComplete()){
+                    intake.stop();
+                    this.limelight.stopLimelight();
                     setPathState(-1);
                 }
                 break;
@@ -205,6 +225,10 @@ public class BlueFarGoal extends OpMode {
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
+        //robot’s current velocity
+        //telemetry.addData("Velocity Magnitude", follower.getVelocity().getMagnitude());
+        //target velocity the robot should have when it finishes the current path
+        //telemetry.addData("PathEndVelocityConstraint", follower.getCurrentPath().getPathEndVelocityConstraint());
         telemetry.update();
 
     }
@@ -230,7 +254,7 @@ public class BlueFarGoal extends OpMode {
         artifact = new Artifact(hardwareMap,aprilTagDetected);
         intake = new Intake(hardwareMap);
         hood = new Hood(hardwareMap);
-        hood.setHoodPosition(0.33);
+        hood.setHoodPosition(0.60);
 
         follower = Constants.createFollower(hardwareMap);
         buildPaths();

@@ -27,11 +27,13 @@ import java.util.List;
 
 //example: https://pedropathing.com/docs/pathing/examples/auto
 
-@Autonomous(name="BlueNearGoal", group="Auto")
-public class blueNearGoal extends OpMode {
 
-    boolean pickUp3Artifacts = true;
+@Autonomous(name="BlueNearGoal", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
+public class BlueNearGoal extends OpMode {
+
+    boolean pickUp3Artifacts = false;
     double shooterPower = 1.0;
+    double shooterVelocityWall = 1600;
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
@@ -97,16 +99,22 @@ public class blueNearGoal extends OpMode {
                 .addPath(new BezierLine(intermediatePose1, pickUpPose1))
                 .setConstantHeadingInterpolation(pickUpPose1.getHeading())
                 .addParametricCallback(0, () -> {intake.run();})
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
         readMotif = follower.pathBuilder()
                 .addPath(new BezierLine(pickUpPose1, readMotifPose))
                 .setLinearHeadingInterpolation(pickUpPose1.getHeading(), readMotifPose.getHeading())
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
         shootArtifact2 = follower.pathBuilder()
                 .addPath(new BezierLine(readMotifPose, shootPose2))
                 .setLinearHeadingInterpolation(readMotifPose.getHeading(), shootPose2.getHeading())
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
         grabPickup2 = follower.pathBuilder()
@@ -115,11 +123,16 @@ public class blueNearGoal extends OpMode {
                 .addPath(new BezierLine(intermediatePose2, pickUpPose2))
                 .setConstantHeadingInterpolation(pickUpPose2.getHeading())
                 .addParametricCallback(0, () -> {intake.run();})
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
         ShootArtifact3 = follower.pathBuilder()
                 .addPath(new BezierLine(pickUpPose2, ShootPose3))
                 .setLinearHeadingInterpolation(pickUpPose2.getHeading(), ShootPose3.getHeading())
+                .addParametricCallback(1, () -> {intake.stop();})
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
         grabPickup3 = follower.pathBuilder()
@@ -128,11 +141,15 @@ public class blueNearGoal extends OpMode {
                 .addPath(new BezierLine(intermediatePose3, pickUpPose3))
                 .setConstantHeadingInterpolation(pickUpPose3.getHeading())
                 .addParametricCallback(0, () -> {intake.run();})
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
         ShootArtifact4 = follower.pathBuilder()
                 .addPath(new BezierLine(pickUpPose3, ShootPose4))
                 .setLinearHeadingInterpolation(pickUpPose3.getHeading(), ShootPose4.getHeading())
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(5))
                 .build();
 
     }
@@ -144,7 +161,8 @@ public class blueNearGoal extends OpMode {
         switch (pathState) {
             case 0:
                 //score preload, if artifact is not busy, go to next state
-                artifact.shootArtifact(shooterPower);
+
+                artifact.shootArtifact(0.0, shooterVelocityWall);
                 setPathState(1);
                 break;
             case 1:
@@ -155,13 +173,14 @@ public class blueNearGoal extends OpMode {
                 break;
             case 2:
                 if(!follower.isBusy()) {
-                    intake.stop();
                     follower.followPath(readMotif, true);
                     setPathState(3);
+                    //setPathState(-1);
                 }
                 break;
             case 3:
                 if(!follower.isBusy()){
+                    intake.stop();
                     int aprilTagDetected = getMotifAprilTag();
                     artifact.setAprilTag(aprilTagDetected);
 
@@ -171,7 +190,7 @@ public class blueNearGoal extends OpMode {
                 break;
             case 4:
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower);
+                    artifact.shootArtifact(shooterPower, shooterVelocityWall);
                     setPathState(5);
                 }
                 break;
@@ -183,14 +202,14 @@ public class blueNearGoal extends OpMode {
                 break;
             case 6:
                 if(!follower.isBusy()){
-                    intake.stop();
+                    //intake.stop();
                     follower.followPath(ShootArtifact3, true);
                     setPathState(7);
                 }
                 break;
             case 7:
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower);
+                    artifact.shootArtifact(shooterPower, shooterVelocityWall);
                     //if 2 artifact pickup, no more pickup needed, stop the path
                     if (pickUp3Artifacts == true){
                         setPathState(8);
@@ -214,14 +233,15 @@ public class blueNearGoal extends OpMode {
                 break;
             case 10:
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower);
+                    artifact.shootArtifact(shooterPower, shooterVelocityWall);
                     setPathState(11);
                 }
                 break;
             case 11:
                 if(artifact.isArtifactShootingComplete()){
                     /* Set the state to a Case we won't use or define, so it just stops running an new paths */
-
+                    intake.stop();
+                    this.limelight.stopLimelight();
                     setPathState(-1);
                 }
                 break;
@@ -265,7 +285,7 @@ public class blueNearGoal extends OpMode {
         artifact = new Artifact(hardwareMap,aprilTagDetected);
         intake = new Intake(hardwareMap);
         hood = new Hood(hardwareMap);
-        hood.setHoodPosition(1);
+        hood.setHoodPosition(0.95);
 
         follower = Constants.createFollower(hardwareMap);
 
