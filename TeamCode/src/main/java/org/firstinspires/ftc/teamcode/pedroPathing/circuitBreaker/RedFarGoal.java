@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Artifact;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Hood;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Intake;
+import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Shooter;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limelight3AAprilTag;
 
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ public class RedFarGoal extends OpMode{
     Intake intake;
     Limelight3AAprilTag limelight;
     Hood hood;
+    Shooter shooter;
+    int aprilTagDetected = 21;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
@@ -54,14 +57,14 @@ public class RedFarGoal extends OpMode{
 
     /** Start Pose of our robot */
     private final Pose startPose = new Pose(88,8,Math.toRadians(90));
-    private final Pose shootPose1 = new Pose(88,14,Math.toRadians(75)); //Linear
+    private final Pose shootPose1 = new Pose(88,15,Math.toRadians(72)); //Linear
     private final Pose controlPose1 = new Pose(100,30);
-    private final Pose pickUpPose1 = new Pose(134,9,Math.toRadians(0));//Linear
-    private final Pose controlPose2 = new Pose(100,30);
-    private final Pose shootPose2 = new Pose(88,14,Math.toRadians(75)); //Linear
-    private final Pose intermediatePose2 = new Pose(120,24,Math.toRadians(90));//Linear
-    private final Pose pickUpPose2 = new Pose(121,31, Math.toRadians(90)); //Constant
-    private final Pose shootPose3 = new Pose(88,14,Math.toRadians(75)); //Linear
+    private final Pose pickUpPose1 = new Pose(133,8,Math.toRadians(0));//Linear
+    private final Pose controlPose2 = new Pose(120,30);
+    private final Pose shootPose2 = new Pose(88,18,Math.toRadians(65)); //Linear
+    private final Pose intermediatePose2 = new Pose(116,24,Math.toRadians(90));//Linear
+    private final Pose pickUpPose2 = new Pose(116,31, Math.toRadians(90)); //Constant
+    private final Pose shootPose3 = new Pose(88,18,Math.toRadians(63)); //Linear
 
     private PathChain  shootArtifact1, grabPickup1, shootArtifact2, grabPickup2,
             ShootArtifact3;
@@ -72,23 +75,21 @@ public class RedFarGoal extends OpMode{
                 .addPath(new BezierLine(startPose, shootPose1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose1.getHeading())
                 .setTranslationalConstraint(1.0)          // inches
-                .setHeadingConstraint(Math.toRadians(5))
+                .setHeadingConstraint(Math.toRadians(3))
                 .build();
 
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootPose1,controlPose1,pickUpPose1))
                 .setLinearHeadingInterpolation(shootPose1.getHeading(), pickUpPose1.getHeading())
-                .addParametricCallback(0, () -> {intake.run();})
                 .setTranslationalConstraint(1.0)          // inches
-                .setHeadingConstraint(Math.toRadians(5))
+                .setHeadingConstraint(Math.toRadians(3))
                 .build();
 
         shootArtifact2 = follower.pathBuilder()
                 .addPath(new BezierCurve(pickUpPose1,controlPose2,shootPose2))
                 .setLinearHeadingInterpolation(pickUpPose1.getHeading(), shootPose2.getHeading())
-                .addParametricCallback(1, () -> {intake.stop();})
                 .setTranslationalConstraint(1.0)          // inches
-                .setHeadingConstraint(Math.toRadians(5))
+                .setHeadingConstraint(Math.toRadians(3))
                 .build();
 
         grabPickup2 = follower.pathBuilder()
@@ -96,17 +97,15 @@ public class RedFarGoal extends OpMode{
                 .setLinearHeadingInterpolation(shootPose2.getHeading(), intermediatePose2.getHeading())
                 .addPath(new BezierLine(intermediatePose2, pickUpPose2))
                 .setConstantHeadingInterpolation(pickUpPose2.getHeading())
-                .addParametricCallback(0, () -> {intake.run();})
                 .setTranslationalConstraint(1.0)          // inches
-                .setHeadingConstraint(Math.toRadians(5))
+                .setHeadingConstraint(Math.toRadians(3))
                 .build();
 
         ShootArtifact3 = follower.pathBuilder()
                 .addPath(new BezierLine(pickUpPose2,shootPose3))
                 .setLinearHeadingInterpolation(pickUpPose2.getHeading(), shootPose3.getHeading())
-                .addParametricCallback(1, () -> {intake.stop();})
                 .setTranslationalConstraint(1.0)          // inches
-                .setHeadingConstraint(Math.toRadians(5))
+                .setHeadingConstraint(Math.toRadians(3))
                 .build();
     }
 
@@ -116,6 +115,8 @@ public class RedFarGoal extends OpMode{
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                intake.run();
+                shooter.start(shooterPower, shooterVelocityFar);
                 follower.followPath(shootArtifact1, true);
                 setPathState(1);
                 break;
@@ -171,6 +172,7 @@ public class RedFarGoal extends OpMode{
                 if(artifact.isArtifactShootingComplete()){
                     intake.stop();
                     this.limelight.stopLimelight();
+                    shooter.stop();
                     setPathState(-1);
                 }
                 break;
@@ -193,6 +195,7 @@ public class RedFarGoal extends OpMode{
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.addData("AprilTag", this.aprilTagDetected);
         telemetry.update();
 
     }
@@ -206,23 +209,25 @@ public class RedFarGoal extends OpMode{
         opmodeTimer.resetTimer();
 
         limelight = new Limelight3AAprilTag(hardwareMap);
-        int aprilTagDetected = limelight.getAprilTagNumber(0); // pipeline 0 is for Motif aprilTag
+        this.aprilTagDetected = limelight.getAprilTagNumber(0); // pipeline 0 is for Motif aprilTag
 
-        telemetry.addData("AprilTag Detected", aprilTagDetected);
+        telemetry.addData("AprilTag Detected", this.aprilTagDetected);
         telemetry.update();
 
-        if (aprilTagDetected != 21 && aprilTagDetected != 22 && aprilTagDetected != 23) {
-            aprilTagDetected = 21;
+        if (this.aprilTagDetected != 21 && this.aprilTagDetected != 22 && this.aprilTagDetected != 23) {
+            this.aprilTagDetected = 21;
         }
 
-        artifact = new Artifact(hardwareMap,aprilTagDetected);
+        artifact = new Artifact(hardwareMap,this.aprilTagDetected);
         intake = new Intake(hardwareMap);
         hood = new Hood(hardwareMap);
         hood.setHoodPosition(0.60);
+        shooter = new Shooter(hardwareMap);
 
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
+
 
     }
 

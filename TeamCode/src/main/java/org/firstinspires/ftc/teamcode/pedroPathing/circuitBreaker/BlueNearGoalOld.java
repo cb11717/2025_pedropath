@@ -8,12 +8,8 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 
-import com.pedropathing.geometry.*;
-import com.pedropathing.math.*;
-import com.pedropathing.paths.*;
-import com.pedropathing.util.*;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -23,14 +19,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Inta
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Shooter;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limelight3AAprilTag;
 
-import java.util.ArrayList;
-import java.util.List;
-
 //example: https://pedropathing.com/docs/pathing/examples/auto
 
 
-@Autonomous(name="BlueNearGoal", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
-public class BlueNearGoal extends OpMode {
+@Autonomous(name="BlueNearGoalOld", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
+@Disabled
+public class BlueNearGoalOld extends OpMode {
 
     boolean pickUp3Artifacts = false;
     double shooterPower = 1.0;

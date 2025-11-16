@@ -32,7 +32,7 @@ public class Shooter {
 
     }
 
-    public void shoot(double shooterPower, double shooterVelocity){
+    public void start(double shooterPower, double shooterVelocity){
 
         if(shooterVelocity > 0){
             ((DcMotorEx) this.Shoot2).setVelocity(shooterVelocity);
@@ -53,5 +53,10 @@ public class Shooter {
         this.Shoot1.setPower(this.Shoot2.getPower());
         this.Shoot3.setPower(this.Shoot2.getPower());
         this.Shoot2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    public double getVelocity(){
+        double shooterCurrentVelocity = ((DcMotorEx) this.Shoot2).getVelocity();
+        return shooterCurrentVelocity;
     }
 }
