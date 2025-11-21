@@ -14,6 +14,7 @@ import com.pedropathing.paths.*;
 import com.pedropathing.util.*;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Arti
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Hood;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Intake;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Shooter;
+import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.ColorDetector;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limelight3AAprilTag;
 
 import java.util.ArrayList;
@@ -33,13 +35,15 @@ public class BlueFarGoal extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
 
+    boolean isPickUp2Needed = true;
     double shooterPower = 1.0;
-    double shooterVelocityFar = 2300;
+    double shooterVelocityFar = 2500;
     Artifact artifact;
     Intake intake;
     Limelight3AAprilTag limelight;
     Hood hood;
     Shooter shooter;
+    ColorDetector colorDetector;
     int aprilTagDetected = 21;
 
     /** This is the variable where we store the state of our auto.
@@ -58,14 +62,14 @@ public class BlueFarGoal extends OpMode {
 
     /** Start Pose of our robot */
     private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
-    private final Pose shootPose1 = new Pose(56,14, Math.toRadians(110)); //Linear
-    private final Pose controlPose1 = new Pose(35,30);
-    private final Pose pickUpPose1 = new Pose(10,9, Math.toRadians(180)); //Linear
+    private final Pose shootPose1 = new Pose(56,14, Math.toRadians(109.5)); //Linear
+    private final Pose controlPose1 = new Pose(37,30);
+    private final Pose pickUpPose1 = new Pose(12,10, Math.toRadians(181)); //Linear
     private final Pose controlPose2 = new Pose(35,30);
-    private final Pose shootPose2 = new Pose(56,14, Math.toRadians(110)); //Linear
-    private final Pose intermediatePose2 = new Pose(28,24, Math.toRadians(90)); //Linear
-    private final Pose pickUpPose2 = new Pose(28,31, Math.toRadians(90)); //Constant
-    private final Pose shootPose3 = new Pose(56,14,Math.toRadians(110));
+    private final Pose shootPose2 = new Pose(54,21, Math.toRadians(110)); //Linear
+    private final Pose intermediatePose2 = new Pose(29,24, Math.toRadians(90)); //Linear
+    private final Pose pickUpPose2 = new Pose(29,31, Math.toRadians(90)); //Constant
+    private final Pose shootPose3 = new Pose(53,20,Math.toRadians(110));
     /*private final Pose controlPose3 = new Pose(65,76);
     private final Pose shootPose3 = new Pose(56,105, Math.toRadians(120)); //Linear
      */
@@ -95,7 +99,7 @@ public class BlueFarGoal extends OpMode {
                 .addPath(new BezierLine(startPose, shootPose1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose1.getHeading())
                 .setTranslationalConstraint(1.0)          // inches
-                .setHeadingConstraint(Math.toRadians(3))
+                .setHeadingConstraint(Math.toRadians(1))
                 .build();
 
         /*grabPickup1 = follower.pathBuilder()
@@ -112,14 +116,14 @@ public class BlueFarGoal extends OpMode {
                 .addPath(new BezierCurve(shootPose1,controlPose1,pickUpPose1))
                 .setLinearHeadingInterpolation(shootPose1.getHeading(), pickUpPose1.getHeading())
                 .setTranslationalConstraint(1.0)          // inches
-                .setHeadingConstraint(Math.toRadians(3))
+                .setHeadingConstraint(Math.toRadians(2))
                 .build();
 
         shootArtifact2 = follower.pathBuilder()
                 .addPath(new BezierCurve(pickUpPose1,controlPose2,shootPose2))
                 .setLinearHeadingInterpolation(pickUpPose1.getHeading(), shootPose2.getHeading())
                 .setTranslationalConstraint(1.0)          // inches
-                .setHeadingConstraint(Math.toRadians(3))
+                .setHeadingConstraint(Math.toRadians(1))
                 .build();
 
         grabPickup2 = follower.pathBuilder()
@@ -128,14 +132,14 @@ public class BlueFarGoal extends OpMode {
                 .addPath(new BezierLine(intermediatePose2, pickUpPose2))
                 .setConstantHeadingInterpolation(pickUpPose2.getHeading())
                 .setTranslationalConstraint(1.0)          // inches
-                .setHeadingConstraint(Math.toRadians(3))
+                .setHeadingConstraint(Math.toRadians(1))
                 .build();
 
         ShootArtifact3 = follower.pathBuilder()
                 .addPath(new BezierLine(pickUpPose2,shootPose3))
                 .setLinearHeadingInterpolation(pickUpPose2.getHeading(), shootPose3.getHeading())
                 .setTranslationalConstraint(1.0)          // inches
-                .setHeadingConstraint(Math.toRadians(3))
+                .setHeadingConstraint(Math.toRadians(1))
                 .build();
 
        /* ShootArtifact3 = follower.pathBuilder()
@@ -162,6 +166,7 @@ public class BlueFarGoal extends OpMode {
                 //if(!follower.isBusy() || (follower.getVelocity().getMagnitude() <= follower.getCurrentPath().getPathEndVelocityConstraint())){
                 if(!follower.isBusy()){
                     artifact.shootArtifact(shooterPower, shooterVelocityFar);
+                    colorDetector.clearLedColor();
                     setPathState(2);
                 }
                 break;
@@ -184,13 +189,18 @@ public class BlueFarGoal extends OpMode {
             case 4:
                 if(!follower.isBusy()){
                     artifact.shootArtifact(shooterPower, shooterVelocityFar);
+                    colorDetector.clearLedColor();
                     setPathState(5);
                 }
                 break;
             case 5:
                 if(artifact.isArtifactShootingComplete()){
                     follower.followPath(grabPickup2, true);
-                    setPathState(6);
+                    if( isPickUp2Needed == true) {
+                        setPathState(6);
+                    } else{
+                        setPathState(8);
+                    }
                 }
                 break;
             case 6:
@@ -204,6 +214,7 @@ public class BlueFarGoal extends OpMode {
             case 7:
                 if(!follower.isBusy()){
                     artifact.shootArtifact(shooterPower, shooterVelocityFar);
+                    colorDetector.clearLedColor();
                     setPathState(8);
                 }
                 break;
@@ -267,8 +278,9 @@ public class BlueFarGoal extends OpMode {
         artifact = new Artifact(hardwareMap,this.aprilTagDetected);
         intake = new Intake(hardwareMap);
         hood = new Hood(hardwareMap);
-        hood.setHoodPosition(0.60);
+        hood.setHoodPosition(0.63);
         shooter = new Shooter(hardwareMap);
+        colorDetector = new ColorDetector(hardwareMap);
 
         follower = Constants.createFollower(hardwareMap);
         buildPaths();

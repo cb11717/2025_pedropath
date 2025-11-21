@@ -22,8 +22,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limeli
 //example: https://pedropathing.com/docs/pathing/examples/auto
 
 
-@Autonomous(name="BlueNearGoal", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
-public class BlueNearGoal extends OpMode {
+@Autonomous(name="BlueNearGoal_alternative", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
+@Disabled
+public class BlueNearGoal_alternative extends OpMode {
 
     boolean isShoot3Needed = false;
     double shooterPower = 1.0;

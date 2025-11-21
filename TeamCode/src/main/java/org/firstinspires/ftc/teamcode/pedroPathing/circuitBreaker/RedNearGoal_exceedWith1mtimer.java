@@ -19,8 +19,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Inta
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Shooter;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limelight3AAprilTag;
 
-@Autonomous(name="RedNearGoal", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
-public class RedNearGoal extends OpMode{
+@Autonomous(name="RedNearGoal_exceedWith1mtimer", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
+@Disabled
+public class RedNearGoal_exceedWith1mtimer extends OpMode{
 
     boolean isShoot3Needed = true;
     double shooterPower = 1.0;

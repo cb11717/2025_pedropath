@@ -9,6 +9,7 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -21,8 +22,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limeli
 //example: https://pedropathing.com/docs/pathing/examples/auto
 
 
-@Autonomous(name="BlueNearGoal", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
-public class BlueNearGoal extends OpMode {
+@Autonomous(name="BlueNearGoal_exceedWith1mtimer", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
+@Disabled
+public class BlueNearGoal_exceedWith1mtimer extends OpMode {
 
     boolean isShoot3Needed = true;
     double shooterPower = 1.0;

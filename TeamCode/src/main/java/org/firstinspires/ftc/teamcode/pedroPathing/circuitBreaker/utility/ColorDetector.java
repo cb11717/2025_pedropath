@@ -117,18 +117,27 @@ public class ColorDetector {
     public int detectColorFromHueValue(float hue, double distanceToArtifact){
         int detectedColor = 0;
 
-        if (hue > 90 && hue <= 180) {
+        if (hue > 90 && hue <= 200) {
             //telemetry.addData(">>> COLOR", "Green");
             detectedColor = 2;
-        } else if (hue > 180 && hue < 360) {
+        } else if (hue > 200 && hue < 360) {
             // telemetry.addData(">>> COLOR", "Purple");
             detectedColor = 3;
-        } else if (distanceToArtifact > 0 && distanceToArtifact < 5 ){
+        } else if (distanceToArtifact > 0 && distanceToArtifact < 3 ){
             //telemetry.addData(">>> COLOR", "artifact detected, but color cannot be identified");
-            detectedColor = 1;
+            detectedColor = 1; //artifact is present in the intake but color sensor not able to detect the color
         } else {
             detectedColor = 0; //artifact not present in the intake
         }
         return detectedColor;
     }
+
+    public void clearLedColor(){
+        rgbC.setPosition(0);
+        rgbR.setPosition(0);
+        rgbL.setPosition(0);
+
+    }
+
+
 }

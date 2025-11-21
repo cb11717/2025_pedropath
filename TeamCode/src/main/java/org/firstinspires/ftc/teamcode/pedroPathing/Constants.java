@@ -16,16 +16,57 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+//Black Robot Constants - Camerupt
 public class Constants {
-   /* public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(12.428)
-            .forwardZeroPowerAcceleration(-44.347800)
-            .lateralZeroPowerAcceleration(-86.786322)
+
+    public static FollowerConstants followerConstants = new FollowerConstants()
+            .mass(13.063)
+            .forwardZeroPowerAcceleration(-43.275)
+            .lateralZeroPowerAcceleration(-77.62)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.09, 0, 0, 0))
             .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.02, 0.01))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.075,0.0,0.00001,0.6,0.01))
-            .centripetalScaling(0.0008);
-            */
+            .centripetalScaling(0.0009);
+
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
+
+    public static MecanumConstants driveConstants = new MecanumConstants()
+            .maxPower(1)
+            .rightFrontMotorName("RFdrive")
+            .rightRearMotorName("RBdrive")
+            .leftRearMotorName("LBdrive")
+            .leftFrontMotorName("LFdrive")
+            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .xVelocity(59.19)
+            .yVelocity(48.04);
+
+
+
+    public static PinpointConstants localizerConstants = new PinpointConstants()
+            .forwardPodY(+6.88)
+            .strafePodX(-2.40)
+            .distanceUnit(DistanceUnit.INCH)
+            .hardwareMapName("pinpoint")
+            .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
+            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+
+
+    public static Follower createFollower(HardwareMap hardwareMap) {
+        return new FollowerBuilder(followerConstants, hardwareMap)
+                .pinpointLocalizer(localizerConstants)
+                .pathConstraints(pathConstraints)
+                .mecanumDrivetrain(driveConstants)
+                .build();
+    }
+}
+
+//Green Robot Constants - Numel
+/*
+public class Constants {
 
    public static FollowerConstants followerConstants = new FollowerConstants()
            .mass(13.063)
@@ -37,22 +78,6 @@ public class Constants {
            .centripetalScaling(0.0008);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
-
-    /*
-    public static MecanumConstants driveConstants = new MecanumConstants()
-            .maxPower(1)
-            .rightFrontMotorName("RFdrive")
-            .rightRearMotorName("RBdrive")
-            .leftRearMotorName("LBdrive")
-            .leftFrontMotorName("LFdrive")
-            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .xVelocity(63.2593134)
-            .yVelocity(47.1911640);
-
-     */
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
@@ -69,8 +94,8 @@ public class Constants {
 
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(+6.75)
-            .strafePodX(-2.5)
+            .forwardPodY(+6.88)
+            .strafePodX(-2.40)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
@@ -86,3 +111,5 @@ public class Constants {
                 .build();
     }
 }
+
+ */

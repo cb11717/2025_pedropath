@@ -244,19 +244,31 @@ public class Artifact {
 
     public void shootArtifactL() {
         this.ArtifactL.setPower(1);
+        this.ArtifactR.setPower(-1);
+        this.ArtifactC.setPower(-1);
         this.sleep(this.sleepTimer);
         this.ArtifactL.setPower(0);
+        this.ArtifactR.setPower(0);
+        this.ArtifactC.setPower(0);
     }
 
     public void shootArtifactC(){
         this.ArtifactC.setPower(1);
+        this.ArtifactR.setPower(-1);
+        this.ArtifactL.setPower(-1);
         this.sleep(this.sleepTimer);
         this.ArtifactC.setPower(0);
+        this.ArtifactR.setPower(0);
+        this.ArtifactL.setPower(0);
 
     }
     public void shootArtifactR(){
         this.ArtifactR.setPower(1);
+        this.ArtifactC.setPower(-1);
+        this.ArtifactL.setPower(-1);
         this.sleep(this.sleepTimer);
         this.ArtifactR.setPower(0);
+        this.ArtifactC.setPower(0);
+        this.ArtifactL.setPower(0);
     }
 }

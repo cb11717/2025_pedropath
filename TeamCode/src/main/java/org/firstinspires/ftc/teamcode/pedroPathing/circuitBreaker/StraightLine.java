@@ -100,10 +100,12 @@ public class StraightLine extends OpMode {
         opmodeTimer.resetTimer();
 
         int aprilTagDetected = 21;
-        artifact = new Artifact(hardwareMap,aprilTagDetected);
+       /* artifact = new Artifact(hardwareMap,aprilTagDetected);
         intake = new Intake(hardwareMap);
         hood = new Hood(hardwareMap);
         hood.setHoodPosition(0.95);
+
+        */
 
         follower = Constants.createFollower(hardwareMap);
 
