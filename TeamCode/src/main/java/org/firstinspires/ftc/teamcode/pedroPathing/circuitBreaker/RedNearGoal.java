@@ -16,14 +16,15 @@ import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Arti
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Hood;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Intake;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem.Shooter;
+import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.ColorDetector;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limelight3AAprilTag;
 
-@Autonomous(name="RedNearGoal", group="Auto", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
+@Autonomous(name="RedNearGoal", group="Auto", preselectTeleOp="2Con_Tele_Cam LoLag 1925 11dec25")
 public class RedNearGoal extends OpMode{
 
     boolean isShoot3Needed = true;
     double shooterPower = 1.0;
-    double shooterVelocityWall = 1650;
+    double shooterVelocityWall = 1325; //1700;
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
@@ -33,7 +34,11 @@ public class RedNearGoal extends OpMode{
     Limelight3AAprilTag limelight;
     Hood hood;
     Shooter shooter;
+    ColorDetector colorDetector;
     int aprilTagDetected = 21;
+    int sleepTimer = 1550;
+
+    int colorLeft, colorCenter, colorRight;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
@@ -43,20 +48,22 @@ public class RedNearGoal extends OpMode{
     //private final Pose startPose = new Pose(128, 111, Math.toRadians(90));
     //private final Pose controlPose1  = new Pose (117,117);
     private final Pose shootPose1 = new Pose(121, 123, Math.toRadians(35));
-    private final Pose intermediatePose1 = new Pose(118,100, Math.toRadians(-90));
-    private final Pose pickUpPose1 = new Pose (118, 90, Math.toRadians(-90));// Constant
+    private final Pose intermediatePose1 = new Pose(116,100, Math.toRadians(-90));
+    private final Pose pickUpPose1 = new Pose (116, 90, Math.toRadians(-90));// Constant
     private final Pose readMotifPose = new Pose(109,96, Math.toRadians(100)); //Linear
     private final Pose shootPose2 = new Pose (122,123,Math.toRadians(40));
-    private final Pose intermediatePose2 = new Pose(113,80, Math.toRadians(-90));
+    private final Pose intermediatePose2 = new Pose(112,80, Math.toRadians(-90));
     private final Pose controlPose2 = new Pose(90,85);
-    private final Pose pickUpPose2 = new Pose (113,66, Math.toRadians(-90));//Constant
+    private final Pose pickUpPose2 = new Pose (112,66, Math.toRadians(-90));//Constant
     private final Pose shootPose3 = new Pose (121,123,Math.toRadians(40));
     private final Pose controlPose3 =  new Pose (100,100);
+    private final Pose leavePose = new Pose (113, 66, Math.toRadians(40));
 
 
 
     private Path scorePreload;
-    private PathChain  shootArtifact1, grabPickup1, readMotif, shootArtifact2, grabPickup2, ShootArtifact3;
+    private PathChain  shootArtifact1, grabPickup1, readMotif, shootArtifact2,
+            grabPickup2, ShootArtifact3, leaveLaunchLine;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -82,6 +89,7 @@ public class RedNearGoal extends OpMode{
         readMotif = follower.pathBuilder()
                 .addPath(new BezierLine(pickUpPose1, readMotifPose))
                 .setLinearHeadingInterpolation(pickUpPose1.getHeading(), readMotifPose.getHeading())
+                .addParametricCallback(0, () -> {this.lightUpLED();})
                 .setTranslationalConstraint(1.0)          // inches
                 .setHeadingConstraint(Math.toRadians(2))
                 .build();
@@ -108,6 +116,14 @@ public class RedNearGoal extends OpMode{
         ShootArtifact3 = follower.pathBuilder()
                 .addPath(new BezierCurve(pickUpPose2, controlPose3, shootPose3))
                 .setLinearHeadingInterpolation(pickUpPose2.getHeading(), shootPose3.getHeading())
+                .addParametricCallback(0, () -> {this.lightUpLED();})
+                .setTranslationalConstraint(1.0)          // inches
+                .setHeadingConstraint(Math.toRadians(2))
+                .build();
+
+        leaveLaunchLine = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose3, leavePose))
+                .setConstantHeadingInterpolation(leavePose.getHeading())
                 .setTranslationalConstraint(1.0)          // inches
                 .setHeadingConstraint(Math.toRadians(2))
                 .build();
@@ -121,16 +137,19 @@ public class RedNearGoal extends OpMode{
             case 0:
                 intake.run();
                 shooter.start(shooterPower, shooterVelocityWall);
-                this.artifact.sleep(55);
+               // this.artifact.sleep(15);
                 setPathState(1);
                 break;
             case 1:
-                artifact.shootArtifact(0.0, shooterVelocityWall);
+                artifact.shootArtifact(0.0, shooterVelocityWall,
+                                       -1, -1, -1);
+                colorDetector.clearLedColor();
                 setPathState(2);
                 break;
             case 2:
                 if(artifact.isArtifactShootingComplete()){
                     follower.followPath(grabPickup1,true);
+                    hood.setHoodPosition(0.92);
                     setPathState(3);
                 }
                 break;
@@ -153,7 +172,9 @@ public class RedNearGoal extends OpMode{
                 break;
             case 5:
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower, shooterVelocityWall);
+                    artifact.shootArtifact(shooterPower, shooterVelocityWall,
+                                           this.colorLeft, this.colorCenter, this.colorRight);
+                    colorDetector.clearLedColor();
                     setPathState(6);
 
                 }
@@ -164,7 +185,7 @@ public class RedNearGoal extends OpMode{
                     if( isShoot3Needed == true) {
                         setPathState(7);
                     } else{
-                        setPathState(9);
+                        setPathState(10);
                     }
 
                 }
@@ -178,13 +199,20 @@ public class RedNearGoal extends OpMode{
                 break;
             case 8:
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower, shooterVelocityWall);
-                    //if 2 artifact pickup, no more pickup needed, stop the path
+                    artifact.shootArtifact(shooterPower, shooterVelocityWall,
+                                           this.colorLeft, this.colorCenter, this.colorRight);
+                    colorDetector.clearLedColor();
                     setPathState(9);
                 }
                 break;
             case 9:
                 if(artifact.isArtifactShootingComplete()){
+                    follower.followPath(leaveLaunchLine, true);
+                    setPathState(10);
+                }
+                break;
+            case 10:
+                if(!follower.isBusy()){
                     /* Set the state to a Case we won't use or define, so it just stops running an new paths */
                     intake.stop();
                     this.limelight.stopLimelight();
@@ -230,11 +258,12 @@ public class RedNearGoal extends OpMode{
         limelight = new Limelight3AAprilTag(hardwareMap);
         this.aprilTagDetected = getMotifAprilTag();
 
-        artifact = new Artifact(hardwareMap,this.aprilTagDetected);
+        artifact = new Artifact(hardwareMap,this.aprilTagDetected, this.sleepTimer, telemetry);
         intake = new Intake(hardwareMap);
         hood = new Hood(hardwareMap);
-        hood.setHoodPosition(0.95);
+        hood.setHoodPosition(0.938);
         shooter = new Shooter(hardwareMap);
+        colorDetector = new ColorDetector(hardwareMap);
 
         follower = Constants.createFollower(hardwareMap);
 
@@ -267,12 +296,20 @@ public class RedNearGoal extends OpMode{
     private int getMotifAprilTag(){
         this.aprilTagDetected = this.limelight.getAprilTagNumber(0);
 
-        telemetry.addData("AprilTag Detected", this.aprilTagDetected);
-        telemetry.update();
-
         if (this.aprilTagDetected != 21 && this.aprilTagDetected != 22 && this.aprilTagDetected != 23) {
             this.aprilTagDetected = 21;
         }
+
+        telemetry.addData("AprilTag Detected", this.aprilTagDetected);
+        telemetry.update();
+
         return aprilTagDetected;
     }
+
+    private void lightUpLED(){
+        this.colorLeft = this.colorDetector.detectColor("L");
+        this.colorCenter = this.colorDetector.detectColor("C");
+        this.colorRight = this.colorDetector.detectColor("R");
+    }
+
 }

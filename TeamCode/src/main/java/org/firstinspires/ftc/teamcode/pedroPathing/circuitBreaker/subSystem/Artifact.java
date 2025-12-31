@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.subSystem;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.ColorDetector;
 
 //April Tag ID 21 - GPP
@@ -23,8 +26,9 @@ public class Artifact {
     double shooterPower;
     double shooterVelocity;
     int sleepTimer;
+    Telemetry telemetry;
 
-    public Artifact(HardwareMap hardwareMap, int iAprilTagNumber){
+    public Artifact(HardwareMap hardwareMap, int iAprilTagNumber, int iSleepTimer, Telemetry iTelemetry){
         this.ArtifactL = hardwareMap.get(CRServo.class, "ArtifactL");
         this.ArtifactC = hardwareMap.get(CRServo.class, "ArtifactC");
         this.ArtifactR = hardwareMap.get(CRServo.class, "ArtifactR");
@@ -37,7 +41,15 @@ public class Artifact {
         this.artifactShootingCompete = true; //true is default
         this.shooterPower = 1.0;
         this.shooterVelocity = 0.0;
-        this.sleepTimer = 1000;
+        telemetry = iTelemetry;
+
+        if(iSleepTimer > 0)
+        {
+            this.sleepTimer = iSleepTimer;
+        } else {
+            this.sleepTimer = 1500;
+        }
+
 
         this.kicker = new Kicker(hardwareMap);
         this.shooter = new Shooter(hardwareMap);
@@ -56,7 +68,8 @@ public class Artifact {
      detect color at each location. If color is not detected, and distance is measurable,
      shoot irrespective of the color
      */
-    public void shootArtifact(double iShooterPower, double iShooterVelocity){
+    public void shootArtifact(double iShooterPower, double iShooterVelocity,
+                              int iColorL, int iColorC, int iColorR){
 
         this.artifactShootingCompete = false;
         if(iShooterVelocity > 0)
@@ -72,13 +85,24 @@ public class Artifact {
        // this.shooter.start(this.shooterPower, this.shooterVelocity);
 
         //start artifact based color detected/distance detected and the AprilTag motif
-        int colorLeft = this.colorDetector.detectColor("L");
-        int colorCenter = this.colorDetector.detectColor("C");
-        int colorRight = this.colorDetector.detectColor("R");
+        int colorLeft = iColorL;
+        int colorCenter = iColorC;
+        int colorRight = iColorR;
+
+        if( iColorL == -1){
+            //the colors have not yet been detected - perhaps beginnig of the game
+            //Detect the colors
+            colorLeft = this.colorDetector.detectColor("L");
+            colorCenter = this.colorDetector.detectColor("C");
+            colorRight = this.colorDetector.detectColor("R");
+
+        }
 
         this.kicker.run();
         //if April Tag ID 21, shooting sequence should be GPP
+        /*
         if( this.aprilTagNumber == 21){
+
             if(colorLeft == 2){
                 this.shootArtifactL();
                 this.shootArtifactC();
@@ -186,6 +210,11 @@ public class Artifact {
 
         }
 
+         */
+
+        this.shootUnidentifiableArtifact(colorLeft,colorCenter,colorRight );
+
+
        // this.sleep(this.sleepTimer);
 
         this.kicker.stop();
@@ -220,10 +249,11 @@ public class Artifact {
     */
     public void shootUnidentifiableArtifact(int colorLeft,int colorCenter,int colorRight)
     {
-
-        this.shootArtifactL();
         this.shootArtifactC();
         this.shootArtifactR();
+        this.shootArtifactL();
+
+
 
         /*
         if(colorLeft == 1){
@@ -243,6 +273,7 @@ public class Artifact {
     }
 
     public void shootArtifactL() {
+
         this.ArtifactL.setPower(1);
         this.ArtifactR.setPower(-1);
         this.ArtifactC.setPower(-1);

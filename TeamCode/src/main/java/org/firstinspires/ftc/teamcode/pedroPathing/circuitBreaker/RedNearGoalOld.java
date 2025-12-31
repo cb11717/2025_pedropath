@@ -35,6 +35,7 @@ public class RedNearGoalOld extends OpMode{
     Hood hood;
     Shooter shooter;
     int aprilTagDetected = 21;
+    int sleepTimer = 900;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
@@ -133,7 +134,8 @@ public class RedNearGoalOld extends OpMode{
                     shooter.start(shooterPower, shooterVelocityWall);
 
                     //score preload, if artifact is not busy, go to next state
-                    artifact.shootArtifact(0.0, shooterVelocityWall);
+                    artifact.shootArtifact(0.0, shooterVelocityWall,
+                                           -1, -1, -1);
                     setPathState(2);
                 }
                 break;
@@ -162,7 +164,8 @@ public class RedNearGoalOld extends OpMode{
                 break;
             case 5:
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower, shooterVelocityWall);
+                    artifact.shootArtifact(shooterPower, shooterVelocityWall,
+                                           -1, -1, -1);
                     setPathState(6);
                 }
                 break;
@@ -181,7 +184,8 @@ public class RedNearGoalOld extends OpMode{
                 break;
             case 8:
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower, shooterVelocityWall);
+                    artifact.shootArtifact(shooterPower, shooterVelocityWall,
+                                           -1, -1, -1);
                     //if 2 artifact pickup, no more pickup needed, stop the path
                     if (pickUp3Artifacts == true){
                         setPathState(9);
@@ -205,7 +209,8 @@ public class RedNearGoalOld extends OpMode{
                 break;
             case 11:
                 if(!follower.isBusy()){
-                    artifact.shootArtifact(shooterPower, shooterVelocityWall);
+                    artifact.shootArtifact(shooterPower, shooterVelocityWall,
+                                           -1, -1, -1);
                     setPathState(12);
                 }
                 break;
@@ -256,7 +261,7 @@ public class RedNearGoalOld extends OpMode{
         limelight = new Limelight3AAprilTag(hardwareMap);
         this.aprilTagDetected = getMotifAprilTag();
 
-        artifact = new Artifact(hardwareMap,this.aprilTagDetected);
+        artifact = new Artifact(hardwareMap,this.aprilTagDetected, this.sleepTimer, telemetry);
         intake = new Intake(hardwareMap);
         hood = new Hood(hardwareMap);
         hood.setHoodPosition(0.95);

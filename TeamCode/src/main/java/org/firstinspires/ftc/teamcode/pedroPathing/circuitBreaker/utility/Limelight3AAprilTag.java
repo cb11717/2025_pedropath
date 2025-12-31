@@ -22,7 +22,7 @@ public class Limelight3AAprilTag {
         // This sets how often we ask Limelight for data (100 times per second)
         this.limelight.setPollRateHz(100);
 
-        this.limelight.start();
+        //this.limelight.start();
 
     }
 
