@@ -343,7 +343,7 @@ public class BlueFarGoal extends OpMode {
     @Override
     public void start() {
         opmodeTimer.resetTimer();
-        setPathState(0);
+         setPathState(0);
     }
 
     /** We do not use this because everything should automatically disable **/
