@@ -9,6 +9,7 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -20,6 +21,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.ColorD
 import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limelight3AAprilTag;
 
 @Autonomous(name="RedNearGoal", group="Auto", preselectTeleOp="2Con_Tele_Cam LoLag 1925 11dec25")
+@Disabled
 public class RedNearGoal extends OpMode{
 
     boolean isShoot3Needed = true;

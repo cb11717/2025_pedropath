@@ -24,6 +24,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.circuitBreaker.utility.Limeli
 
 
 @Autonomous(name="BlueNearGoal", group="Auto", preselectTeleOp="2Con_Tele_Cam LoLag 1925 11dec25")
+@Disabled
 public class BlueNearGoal extends OpMode {
 
     boolean isShoot3Needed = true;

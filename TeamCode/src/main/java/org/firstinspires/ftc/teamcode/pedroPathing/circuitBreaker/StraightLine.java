@@ -13,6 +13,7 @@ import com.pedropathing.paths.*;
 import com.pedropathing.util.*;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous(name="StraightLine", group="Test", preselectTeleOp="ATHENS TwoCon_Teleop_1400 6nov25")
+@Disabled
+
 public class StraightLine extends OpMode {
 
     double shooterPower = 1.0;

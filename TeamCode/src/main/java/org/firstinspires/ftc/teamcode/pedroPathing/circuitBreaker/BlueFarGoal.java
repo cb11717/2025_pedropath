@@ -31,6 +31,7 @@ import java.util.List;
 
 
 @Autonomous(name="BlueFarGoal", group="Auto", preselectTeleOp="2Con_Tele_Cam LoLag 1925 11dec25")
+@Disabled
 public class BlueFarGoal extends OpMode {
 
     private Follower follower;
